@@ -1,7 +1,7 @@
 {
   "agent": "GPT",
-  "status": "idle",
-  "quota_left": 100.0,
+  "status": "active",
+  "quota_left": 100,
   "current_task": "none",
-  "updated_at": "2026-10-14T00:00:00"
+  "updated_at": "2026-10-14T14:09:01"
 }
