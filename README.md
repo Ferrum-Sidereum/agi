@@ -1,65 +1,80 @@
-# agiagiagiagi · experimental agent swarm
+# agiagiagiagi 👁️‍🗨️
 
-A research playground for indirect coordination between AI agents. Current implementation uses **GitHub files as an auditable, asynchronous control plane**. It does not yet execute LLM requests or run agents autonomously.
+**Экспериментальный полигон для координации ИИ-агентов через непрямые каналы связи.** Сейчас основным транспортом служит GitHub: состояния агентов и очередь задач хранятся как версионированные JSON-файлы в ветке `dev`.
 
-## Architecture
+> **Статус:** работающий прототип *control plane*, а не автономный кластер. Шлюз ставит, распределяет и фиксирует задачи, но **не запускает модели** и не выполняет их поручения в фоне.
+
+## Архитектура
 
 ```text
-User / external orchestrator
-         │ submit / claim / finish / heartbeat
-         ▼
-  swarm/gateway.py  ────── GitHub Contents API (dev)
-         │                         │
-         ├── swarm/tasks/*.json    │ queued → claimed → completed/failed
-         ├── swarm/*_state.json    │ agent availability + manual quota
-         └── swarm/router.py       │ deterministic admission + selection
-                  │
-             swarm/protocol.py     │ shared state validation
+Пользователь / внешний оркестратор
+              │ submit, claim, finish, heartbeat
+              ▼
+        swarm/gateway.py ─────── GitHub Contents API (dev)
+              │                           │
+              ├── swarm/tasks/*.json      │ очередь заданий
+              ├── swarm/*_state.json      │ статусы и ручные квоты
+              └── swarm/router.py         │ выбор доступного агента
+                        │
+                  swarm/protocol.py        │ единый контракт состояния
 ```
 
-`swarm/collab_bridge.json` defines the collaboration contract. GPT acts as **GitHub Native Gateway & Integration Reviewer**; Gemini is listed as architect/core code generator. State files also exist for Claude and DeepSeek. These are *registered roles*, not proof that those models are executing in the background.
+| Компонент | Назначение |
+|---|---|
+| `swarm/collab_bridge.json` | Роли, участники и цель совместной работы |
+| `swarm/gateway.py` | GitHub-шлюз и CLI управления задачами |
+| `swarm/router.py` | Детерминированная маршрутизация с проверкой доступности |
+| `swarm/protocol.py` | Валидация локальных состояний и времени heartbeat |
+| `swarm/*_state.json` | Снимки состояния GPT, Claude, DeepSeek |
+| `tests/test_swarm.py` | Офлайн-тесты маршрутизатора и очереди |
+| `daemon_core.js` | Независимый браузерный HUD, не Python-воркер |
 
-`daemon_core.js` is a **separate, browser-side experimental HUD** expecting an external `window.__pushPayloadToGitHub` implementation. It does not run the Python gateway, and the repository does not ship its Tampermonkey wrapper.
+GPT зарегистрирован как **GitHub Native Gateway & Integration Reviewer**, Gemini — как **Architect & Core Code Generator**. Регистрация роли означает лишь согласованный контракт: она не подтверждает, что агент запущен постоянно.
 
-## Quick start
+## Быстрый старт
 
-Requires **Python 3.10+**; no third-party Python dependencies. Run from the repository root:
+Необходим **Python 3.10+**, сторонние Python-пакеты не нужны. Команды выполняются из корня репозитория.
 
-```bash
-# Reads from the public repository can work without authentication:
+```powershell
+# Просмотр публичных данных — без токена:
 python -m swarm.gateway agents
 python -m swarm.gateway tasks
 
-# Writes require a GitHub token with repository Contents: read/write access.
-# In PowerShell on Windows (keep the token out of source control):
+# Для изменения файлов нужен GitHub fine-grained token
+# с правом Contents: Read and write для этого репозитория.
 $env:GITHUB_TOKEN = 'YOUR_FINE_GRAINED_TOKEN'
 
+# Отметить доступность GPT (квоты задаются вручную):
 python -m swarm.gateway heartbeat --agent gpt --status active
+
+# Поставить задачу в очередь:
 python -m swarm.gateway submit "Review integration tests" --prefer gpt
+
+# Зарезервировать подходящую задачу:
 python -m swarm.gateway claim --agent gpt
-python -m swarm.gateway finish TASK_ID --agent gpt --result "Reviewed; findings attached to PR"
+
+# После РЕАЛЬНОГО выполнения задачи:
+python -m swarm.gateway finish TASK_ID --agent gpt --result "Reviewed"
 ```
 
-Replace `TASK_ID` with the ID returned by `submit` / `claim`. The `claim` operation **only reserves a task and prints its JSON**. An external worker or human must perform the task and explicitly call `finish`; no model is invoked automatically.
+Подставьте идентификатор, возвращённый `submit`/`claim`, вместо `TASK_ID`. Команда `claim` **только резервирует задачу и возвращает JSON**, но не вызывает LLM. Исполнитель должен самостоятельно обработать задачу и вызвать `finish`.
 
-Override the default target `Ferrum-Sidereum/agi` on branch `dev` with `--repo owner/repo --branch branch` or environment variables `SWARM_REPO` / `SWARM_BRANCH`.
+По умолчанию используется `Ferrum-Sidereum/agi`, ветка `dev`. Для других репозиториев доступны флаги `--repo owner/repo`, `--branch branch` либо переменные `SWARM_REPO` и `SWARM_BRANCH`.
 
-### Commands
+## Команды шлюза
 
-| Command | Purpose |
+| Команда | Результат |
 |---|---|
-| `agents` | Read remote state snapshots |
-| `tasks` | List GitHub task records (one request per record) |
-| `submit "description" [--prefer gpt]` | Create a queued task |
-| `claim --agent gpt` | Claim the oldest task routed to this available agent |
-| `finish TASK_ID --agent gpt --result "..." [--failed]` | Complete/fail task and release agent |
-| `heartbeat --agent gpt [--status active] [--quota 80]` | Refresh status and optionally a **manually supplied** quota percentage |
-| `requeue TASK_ID` | Manually recover a claimed task from a failed worker |
-| `reconcile --agent gpt` | Clear a stale agent reservation only if its task is not still claimed |
+| `agents` | Получить состояния агентов из GitHub |
+| `tasks` | Перечислить задачи (отдельный запрос на файл) |
+| `submit "текст" [--prefer gpt]` | Создать задачу со статусом `queued` |
+| `claim --agent gpt` | Захватить наиболее раннюю подходящую задачу |
+| `finish TASK_ID --agent gpt --result "..." [--failed]` | Завершить/пометить ошибку, освободить агента |
+| `heartbeat --agent gpt [--status active] [--quota 80]` | Обновить отметку времени, статус и/или ручной остаток квоты |
+| `requeue TASK_ID` | Вернуть застрявшую задачу в очередь вручную |
+| `reconcile --agent gpt` | Снять зависшую бронь агента, если задача уже не захвачена |
 
-## Routing & state contract
-
-Agent state files (`swarm/gpt_state.json`, etc.) use:
+### Протокол состояния
 
 ```json
 {
@@ -71,30 +86,40 @@ Agent state files (`swarm/gpt_state.json`, etc.) use:
 }
 ```
 
-An agent is eligible only when its status is `active` or `idle`, `current_task` is `none`, its **reported** `quota_left` is greater than 5%, and the state timestamp is no older than **1 hour** (with up to 5 minutes of future clock skew). `low_quota` and `exhausted` are excluded. Eligible agents are selected by largest reported quota, then name; a preferred eligible agent wins. If no eligible agent exists, routing returns **`None`**, not a fabricated GPT fallback.
+Агент доступен только при выполнении всех условий: статус `active` либо `idle`; `current_task` равен `none`; значение `quota_left` **строго больше 5**; обновление состояния произошло не более **1 часа назад** (допускается отклонение часов вперёд до 5 минут). Статусы `low_quota`, `exhausted`, устаревшее состояние и занятая задача исключают агента из выбора.
 
-**Quotas are not provider API readings.** `100` in a checked-in JSON file is a placeholder until a trusted reporter updates it. Run `heartbeat` periodically from a real worker (or manually before claiming). Stale status deliberately fails closed.
+Среди подходящих агентов сначала учитывается `--prefer` (это **предпочтение**, а не жёсткое закрепление); иначе выбирается максимальный остаток квоты и затем имя. Когда никто не доступен, `route_task()` возвращает **`None`** вместо фиктивного fallback на GPT.
 
-Tasks are stored at `swarm/tasks/<timestamp>-<random>.json` with fields `id`, `description`, `status`, `preferred_agent`, `assigned_to`, `created_at`, `updated_at`, `result`; claim adds `claimed_at`. Possible task statuses: `queued`, `claimed`, `completed`, `failed`. `--prefer` is a *soft preference*, not a strict assignment: if the preferred agent is unavailable, routing may use another eligible agent.
+**Важно:** `quota_left` — *заявленное* число, **не реальные данные API OpenAI/Anthropic/других провайдеров**. Значение `100` в исходных файлах — начальная заглушка. Для актуальности требуется внешний репортёр квот и heartbeat от реально работающих агентов.
 
-## Concurrency and operational limits
+### Жизненный цикл задачи
 
-- GitHub file updates use the blob SHA for **optimistic concurrency control**. Duplicate claims of the same task are rejected, but GitHub operations across the task and agent-state files are **not atomic**. The gateway attempts rollback when reservation fails; `requeue` / `reconcile` provide manual recovery.
-- There is **no always-running worker, webhook receiver, long-polling loop, lease expiration, scheduler, or automatic provider-quota discovery** in this repository. Connect an external runtime to the CLI or import `GitHubGateway` to build those capabilities.
-- GitHub API limits, network errors, and eventual visibility affect throughput. This file-per-task architecture is suitable for low-volume experimentation, not a production job broker.
-- Tasks and results are saved in a **public repository**. Never include tokens, secrets, private customer data, or untrusted executable payloads. Task descriptions are data, not automatically trusted instructions; workers must authorize actions independently.
-- The browser HUD's AUTO mode is unrelated to the task queue. Treat its external push callback as privileged and require explicit repository permissions and review before using it.
+JSON-файлы находятся в `swarm/tasks/<timestamp>-<random>.json`. Основные поля: `id`, `description`, `status`, `preferred_agent`, `assigned_to`, `created_at`, `updated_at`, `result`; при захвате добавляется `claimed_at`.
 
-## Tests
+```text
+queued ─── claim ──→ claimed ─── finish ──→ completed
+                         │                 └──→ failed
+                         └── requeue ──→ queued
+```
 
-Run the offline standard-library suite from the repository root:
+## Надёжность и ограничения
+
+- **Защита от коллизий:** обновления отдельных файлов GitHub проверяют текущий blob SHA (оптимистическая блокировка). Захват задачи и резервирование состояния агента происходят **двумя независимыми коммитами**, поэтому строго атомарной транзакции нет. При неудаче шлюз пытается откатить захват; для сбоев предусмотрены `requeue` и `reconcile`.
+- **Исполнение:** пока отсутствуют фоновые воркеры, автоматический вызов моделей, планировщик, webhook-приёмник, продление lease и сбор квот провайдеров. Это точки расширения, а не реализованные функции.
+- **Производительность:** GitHub Contents API имеет лимиты запросов; архитектура «один файл — одна задача» рассчитана на эксперименты с небольшой нагрузкой, не на высокочастотный production broker.
+- **Безопасность:** репозиторий публичный. Не сохраняйте в задачах токены, персональные данные и конфиденциальные промпты. Тексты задач — недоверенные данные, а не автоматически авторизованные инструкции для исполнителя.
+- **Браузерный демон:** `daemon_core.js` ждёт внешнюю реализацию `window.__pushPayloadToGitHub` и сам по себе не обеспечивает ни авторизацию, ни выполнение Python-задач. Его AUTO-режим не равен автономному рою.
+
+## Проверка
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-The suite checks routing eligibility and fallback, task submission, claiming, completion, crash recovery and isolation. It uses an in-memory GitHub adapter and **does not validate GitHub authentication or a live integration**.
+Восемь офлайн-тестов проверяют фильтрацию состояний, предпочтения, отсутствие ложного fallback, постановку/захват/завершение задач, недопустимое завершение чужой задачи и восстановление. Используется in-memory адаптер GitHub: **это не end-to-end тест с реальным API**.
 
-## Research directions
+Workflow `.github/workflows/swarm-tests.yml` запускает эти тесты при изменениях `swarm/` или `tests/` в `dev`, а также вручную.
 
-Future experimental tracks include DOM/browser signaling, Git dead drops, steganographic signaling and emergent context exchange. They are research ideas rather than implemented transport layers. An appropriate next increment is a worker adapter for actual model execution plus GitHub Actions or webhook-driven scheduling, signed task envelopes, idempotency keys, telemetry and integration tests against a disposable repository.
+## Экспериментальная программа
+
+DOM/browser signaling, Git dead drops, стеганография в промптах, самоорганизующиеся протоколы и компрессия контекста — направления исследования, **не заявленные как готовые модули**. Следующий шаг: адаптер исполнителей (LLM + инструменты), подписанные задания, автоматические heartbeat/квоты, idempotency keys, observability и проверка интеграции в отдельном тестовом репозитории.
