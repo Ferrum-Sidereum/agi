@@ -1,0 +1,18 @@
+{
+  "project": "agi",
+  "branch": "dev",
+  "collaborators": {
+    "gemini": {
+      "role": "Architect & Core Code Generator",
+      "status": "active",
+      "last_action": "Created swarm protocol, router, and collab bridge"
+    },
+    "gpt": {
+      "role": "GitHub Native Gateway & Integration Reviewer",
+      "status": "active",
+      "instructions": "Use the GitHub connector for integration reviews. Task transport is handled by swarm/gateway.py; claiming a task does not start an autonomous worker."
+    }
+  },
+  "current_objective": "Establish multi-agent swarm pipeline with quota monitoring and decentralized task routing.",
+  "updated_at": "2026-10-14T14:22:21Z"
+}

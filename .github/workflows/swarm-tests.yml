@@ -1,0 +1,39 @@
+name: Swarm offline tests
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'swarm/**'
+      - 'tests/**'
+      - 'userscripts/**'
+      - 'daemon_core.js'
+      - '.github/workflows/swarm-tests.yml'
+  pull_request:
+    branches: [dev]
+    paths:
+      - 'swarm/**'
+      - 'tests/**'
+      - 'userscripts/**'
+      - 'daemon_core.js'
+      - '.github/workflows/swarm-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run offline swarm tests
+        run: python -m unittest discover -s tests -v
+      - name: Run browser gateway tests
+        run: node --test tests/test_browser_gateway.cjs
