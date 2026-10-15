@@ -1,119 +1,104 @@
-/* == Remote Daemon Core v1.0 == */
-(function() {
+/* AGI Remote Daemon Core v2.0 — loaded inside Loader's userscript context. */
+(function (bridge) {
     'use strict';
-    console.log('%c[GitHub Daemon Core] Загружен из репозитория Ferrum-Sidereum/agi (dev)', 'color: #10b981; font-weight: bold;');
 
-    const processedHashes = new Set();
-    let isAutoMode = localStorage.getItem("gh_daemon_auto_mode") !== "false";
-    let pendingPayload = null;
+    const handled = new Set();
+    let pending = null;
+    let busy = false;
+    const hudId = 'agi-loader-hud-v2';
 
-    function createHud() {
-        if (document.getElementById("gh-auto-hud")) return;
-        const container = document.createElement("div");
-        container.id = "gh-auto-hud";
-        container.style.cssText = "position:fixed; bottom:16px; right:16px; z-index:999999; display:flex; gap:8px; align-items:center; font-family:monospace; font-size:12px; font-weight:bold;";
-
-        const modeBtn = document.createElement("div");
-        modeBtn.id = "gh-hud-mode";
-        modeBtn.style.cssText = "padding:8px 12px; border-radius:8px; background:#111827; cursor:pointer; user-select:none; box-shadow:0 4px 12px rgba(0,0,0,0.5);";
-        modeBtn.addEventListener("click", () => {
-            isAutoMode = !isAutoMode;
-            localStorage.setItem("gh_daemon_auto_mode", isAutoMode);
-            updateModeUI();
-            if (isAutoMode && pendingPayload) {
-                const p = pendingPayload;
-                pendingPayload = null;
-                hideActionBtn();
-                window.__pushPayloadToGitHub(p);
-            }
+    function makeHud() {
+        if (document.getElementById(hudId) || !document.body) return;
+        const hud = document.createElement('div');
+        hud.id = hudId;
+        hud.style.cssText = 'position:fixed;bottom:14px;right:14px;z-index:2147483640;display:flex;gap:6px;font:12px monospace;color:white';
+        const status = document.createElement('div');
+        status.id = 'agi-loader-status-v2';
+        status.style.cssText = 'background:#17202d;border:1px solid #586477;border-radius:7px;padding:8px 10px;max-width:320px';
+        status.textContent = 'AGI Loader: готов';
+        const action = document.createElement('button');
+        action.type = 'button';
+        action.id = 'agi-loader-submit-v2';
+        action.style.cssText = 'display:none;background:#265bdf;color:#fff;border:0;border-radius:7px;padding:8px 10px;cursor:pointer';
+        action.textContent = 'Записать в GitHub';
+        action.addEventListener('click', () => { if (pending) void runPending(); });
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.id = 'agi-loader-mode-v2';
+        toggle.style.cssText = 'background:#142134;color:#fff;border:1px solid #50607c;border-radius:7px;padding:8px;cursor:pointer';
+        toggle.addEventListener('click', () => {
+            bridge.setAuto(!bridge.isAuto());
+            updateMode();
+            // Manual pending commands still require user click, even after mode flip.
         });
+        hud.append(action, status, toggle);
+        document.body.appendChild(hud);
+        updateMode();
+    }
 
-        const statusBox = document.createElement("div");
-        statusBox.id = "gh-hud-status";
-        statusBox.style.cssText = "padding:8px 12px; border-radius:8px; background:#1f2937; color:#9ca3af; border:1px solid #374151;";
-        statusBox.textContent = "Удаленный демон активен (dev)...";
-
-        const actionBtn = document.createElement("div");
-        actionBtn.id = "gh-hud-action";
-        actionBtn.style.cssText = "display:none; padding:8px 12px; border-radius:8px; background:#2563eb; color:#ffffff; cursor:pointer;";
-        actionBtn.addEventListener("click", () => {
-            if (pendingPayload) {
-                const p = pendingPayload;
-                pendingPayload = null;
-                hideActionBtn();
-                window.__pushPayloadToGitHub(p);
+    function updateMode() {
+        const btn = document.getElementById('agi-loader-mode-v2');
+        if (btn) btn.textContent = bridge.isAuto() ? 'AUTO ON' : 'MANUAL';
+    }
+    function status(message) {
+        const e = document.getElementById('agi-loader-status-v2');
+        if (e) e.textContent = message;
+        console.info('[AGI Loader]', message);
+    }
+    function showPending(show) {
+        const e = document.getElementById('agi-loader-submit-v2');
+        if (e) e.style.display = show ? 'block' : 'none';
+    }
+    async function runPending() {
+        if (!pending || busy) return;
+        const {payload, key} = pending;
+        pending = null;
+        showPending(false);
+        busy = true;
+        try {
+            status('Запись файлов в dev…');
+            const r = await bridge.submit(payload);
+            handled.add(key);
+            status(`Готово: ${r.files} файлов · ${r.sha.slice(0, 8)}`);
+        } catch (err) {
+            // Do not spin and retry on every DOM scan after a rejection/error.
+            handled.add(key);
+            status(`Ошибка: ${err.message}`);
+        } finally {
+            busy = false;
+        }
+    }
+    function scan() {
+        makeHud();
+        if (pending || busy) return;
+        for (const block of document.querySelectorAll('pre, code, code-block')) {
+            const raw = block.innerText || block.textContent || '';
+            if (!raw.includes('"GITHUB_AUTO_PUSH"') || !raw.includes('"EOF_READY"')) continue;
+            const start = raw.indexOf('{'), end = raw.lastIndexOf('}');
+            if (start < 0 || end <= start) continue;
+            let payload;
+            try { payload = JSON.parse(raw.slice(start, end + 1)); }
+            catch (_) { continue; }
+            if (payload.action !== 'GITHUB_AUTO_PUSH' || payload.EOF_READY !== true) continue;
+            const key = JSON.stringify(payload);
+            if (handled.has(key)) continue;
+            try {
+                const result = bridge.validate(payload);
+                pending = {payload, key};
+                const mustManual = result.selfUpdate || !bridge.isAuto();
+                if (mustManual) {
+                    showPending(true);
+                    status(result.selfUpdate ? 'Обновление кода: нажмите «Записать в GitHub»' : 'Ожидается подтверждение');
+                } else {
+                    void runPending();
+                }
+                break;
+            } catch (err) {
+                handled.add(key);
+                status(`Отклонён пакет: ${err.message}`);
             }
-        });
-
-        container.appendChild(actionBtn);
-        container.appendChild(statusBox);
-        container.appendChild(modeBtn);
-        document.body.appendChild(container);
-        updateModeUI();
-    }
-
-    function updateModeUI() {
-        const modeBtn = document.getElementById("gh-hud-mode");
-        if (!modeBtn) return;
-        if (isAutoMode) {
-            modeBtn.textContent = "🟢 AUTO: ON";
-            modeBtn.style.color = "#10b981";
-            modeBtn.style.border = "1px solid #10b981";
-        } else {
-            modeBtn.textContent = "🟡 MANUAL";
-            modeBtn.style.color = "#f59e0b";
-            modeBtn.style.border = "1px solid #f59e0b";
         }
     }
-
-    function setStatus(text, color = "#9ca3af") {
-        const statusBox = document.getElementById("gh-hud-status");
-        if (statusBox) {
-            statusBox.textContent = text;
-            statusBox.style.color = color;
-            statusBox.style.borderColor = color;
-        }
-    }
-
-    function showActionBtn(payload) {
-        const btn = document.getElementById("gh-hud-action");
-        if (btn) {
-            btn.textContent = `🚀 Запушить (${payload.files.length} ф.)`;
-            btn.style.display = "block";
-        }
-    }
-
-    function hideActionBtn() {
-        const btn = document.getElementById("gh-hud-action");
-        if (btn) btn.style.display = "none";
-    }
-
-    function hashStr(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            hash = ((hash << 5) - hash) + str.charCodeAt(i);
-            hash |= 0;
-        }
-        return hash.toString();
-    }
-
-    // Экспортируем функции наружу для обертки
-    window.__daemonCore = {
-        checkAndRun(payload) {
-            const uniqueKey = hashStr(payload.repo + (payload.branch || "dev") + payload.commit_message + JSON.stringify(payload.files));
-            if (processedHashes.has(uniqueKey)) return;
-            processedHashes.add(uniqueKey);
-
-            if (isAutoMode) {
-                window.__pushPayloadToGitHub(payload);
-            } else {
-                pendingPayload = payload;
-                setStatus(`Готов пакет (${payload.branch || "dev"})`, "#fbbf24");
-                showActionBtn(payload);
-            }
-        },
-        setStatus
-    };
-
-    createHud();
-})();
+    makeHud();
+    setInterval(scan, 1500);
+})(bridge);

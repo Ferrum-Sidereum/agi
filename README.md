@@ -27,9 +27,20 @@
 | `swarm/protocol.py` | Валидация локальных состояний и времени heartbeat |
 | `swarm/*_state.json` | Снимки состояния GPT, Claude, DeepSeek |
 | `tests/test_swarm.py` | Офлайн-тесты маршрутизатора и очереди |
-| `daemon_core.js` | Независимый браузерный HUD, не Python-воркер |
+| `daemon_core.js` | Удалённое ядро браузерного Gateway (HUD, scanner), загружается Loader |
 
 GPT зарегистрирован как **GitHub Native Gateway & Integration Reviewer**, Gemini — как **Architect & Core Code Generator**. Регистрация роли означает лишь согласованный контракт: она не подтверждает, что агент запущен постоянно.
+
+## Gemini → GitHub → Tampermonkey (browser gateway)
+
+Устанавливаются **два независимых userscript** из ветки `dev`:
+
+- [Remote Daemon Loader](userscripts/gemini-github-loader.user.js) — обычные команды `GITHUB_AUTO_PUSH`, загрузка актуального `daemon_core.js`, выбор AUTO/MANUAL.
+- [Recovery](userscripts/gemini-github-recovery.user.js) — аварийные команды `GITHUB_RECOVERY_PUSH`, не зависит от Loader и всегда требует подтверждения.
+
+Оба userscript поддерживают обновления Tampermonkey через `@updateURL` / `@downloadURL` и требуют повышения `@version`. Загрузка новой версии зависит от периодической проверки обновлений Tampermonkey, а не происходит сразу после push. Токен вводится через меню каждого скрипта и сохраняется в его `GM_setValue`; **не вставляйте токены в исходники**. Обновление исполняемого кода требует ручного подтверждения независимо от AUTO.
+
+Полные инструкции: [INSTALL_RU.md](INSTALL_RU.md), [BROWSER_GATEWAY.md](BROWSER_GATEWAY.md). Проверки: `node --test tests/test_browser_gateway.cjs`.
 
 ## Быстрый старт
 
@@ -108,7 +119,7 @@ queued ─── claim ──→ claimed ─── finish ──→ completed
 - **Исполнение:** пока отсутствуют фоновые воркеры, автоматический вызов моделей, планировщик, webhook-приёмник, продление lease и сбор квот провайдеров. Это точки расширения, а не реализованные функции.
 - **Производительность:** GitHub Contents API имеет лимиты запросов; архитектура «один файл — одна задача» рассчитана на эксперименты с небольшой нагрузкой, не на высокочастотный production broker.
 - **Безопасность:** репозиторий публичный. Не сохраняйте в задачах токены, персональные данные и конфиденциальные промпты. Тексты задач — недоверенные данные, а не автоматически авторизованные инструкции для исполнителя.
-- **Браузерный демон:** `daemon_core.js` ждёт внешнюю реализацию `window.__pushPayloadToGitHub` и сам по себе не обеспечивает ни авторизацию, ни выполнение Python-задач. Его AUTO-режим не равен автономному рою.
+- **Браузерный демон:** `daemon_core.js` загружается Loader и делегирует запись через проверяемый bridge. Авторизация хранится в Tampermonkey; браузерный шлюз не запускает Python-задачи и работает лишь при открытой вкладке.
 
 ## Проверка
 
