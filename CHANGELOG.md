@@ -2,6 +2,15 @@
 
 Append-only chronological record (newest entry first). Document **actual committed changes** and what testing was observed. Prospective plans belong in the checkpoint, not in this log.
 
+## 2026-10-20 — Interactive design update — self-directed global goals and no-compromise/no-spend limits
+
+- **Area:** `experiment/chatgpt-scheduled-loop`.
+- **Change:** Added `.agent/chatgpt-scheduled/GOALS.md`, `PLAN.md` and `GOAL_HISTORY.md` for the single-active-global-checkpoint lifecycle; defined strategic question generation on verified completion, self-planned subgoals, and append-only milestone evidence. Updated `AGENTS.md`, runbook and plan priority to prefer technology that measurably expands research capability.
+- **Decision:** `ADR-0002` — research-capability multipliers are the preferred long-term directions; uncompromising user privacy/security/reputation protection and **zero incremental user spending** are absolute execution vetoes.
+- **Cost/security gate:** no purchases, paid APIs, metered cloud/CI, trials with payment methods or unclear tariffs; no credential/PII publication, impersonation, external publicity or potentially compromising user actions.
+- **Checks:** Verified updated files via GitHub connector read-back in interactive chat. Architecture/policy consistency reviewed; no software test command was executed: **runtime tests NOT RUN**. Native Scheduled Task success remains **UNVERIFIED**.
+- **Next:** Keep `G-0001` active; complete two genuine unattended write/read-back probes, then require the scheduled agent to author its own next subgoal plan and pursue it under the frozen `G-0001` exit criteria.
+
 ## 2026-10-20 — Interactive setup — UNATTENDED PILOT NOT YET VERIFIED
 
 - **Area:** `experiment/chatgpt-scheduled-loop` (created from `dev`).
