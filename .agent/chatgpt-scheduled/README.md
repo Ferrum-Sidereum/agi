@@ -15,7 +15,7 @@ The existing `swarm/` gateway is a control plane, not an autonomous model execut
 
 1. Read `AGENTS.md` on experiment branch in full (hard rules and stop conditions).
 2. Read `README.md` on `dev`, then the relevant source files for the chosen issue.
-3. Read this runbook and `.agent/chatgpt-scheduled/checkpoint.md`.
+3. Read this runbook, `.agent/chatgpt-scheduled/GOALS.md` (active big checkpoint), `PLAN.md`, `GOAL_HISTORY.md` and `.agent/chatgpt-scheduled/checkpoint.md`.
 4. Read `.agent/chatgpt-scheduled/DECISIONS.md`; identify and cite the latest **ACCEPTED** ADR (currently ADR-0001).
 5. Read the latest `CHANGELOG.md` entries and `.agent/chatgpt-scheduled/probe.md`; cross-check whether a stage was already committed.
 6. Confirm working branch, current blob SHAs, and allowed write paths before any edit.
@@ -28,8 +28,8 @@ If anything mandatory is missing, stop; do not make up context.
 
 - `READ INPUTS`: current rules, original project sources, checkpoint, last ACCEPTED ADR, recent changelog.
 - `RESTORE STATE`: verify stage from committed GitHub content; don't trust only the task prompt or prior chat.
-- `CHOOSE NEXT PROBLEM`: one concrete question and acceptance criteria (pilot: feasibility test).
-- `THINK/CHALLENGE`: compare options and counterarguments; record failure modes and falsifiable assumptions.
+- `CHOOSE NEXT PROBLEM`: only a step advancing the SINGLE current active global checkpoint (pilot: feasibility). Among safe zero-cost ways to advance it, prioritize reusable technologies and tools that multiply future research capability; do not abandon the current goal for a new one.
+- `THINK/CHALLENGE`: compare options and counterarguments; evaluate measurable research-capability gain, reuse, user-compromise/privacy/security/reputation risk, and incremental cost; any risk or expense blocks execution; record failure modes and falsifiable assumptions.
 - `VERIFY/TEST`: run *available* concrete tests/invariants and capture the observations. `NOT RUN` is never `PASS`.
 - `COMMIT`: only permitted changes, correct branch, compare-and-swap SHA where available; no merge/force.
 - `VERIFY REMOTE`: retrieve committed content again and confirm actual commit result/branch.
@@ -43,7 +43,7 @@ If anything mandatory is missing, stop; do not make up context.
 
 **Stage 2 / `probe-2`:** repeat mandatory reads, retrieve and quote exact run-1 marker from GitHub; verify it is different from the current execution and from interactive setup. Commit second unique marker and the exact previous marker read-back to `probe.md`; independently retrieve it. If verified, update `checkpoint.md` to `architecture-cycle` with actual evidence. Do NOT claim a completed pilot if any part is missing.
 
-**Architecture stage / `architecture-cycle`:** one high-value architecture problem per invocation. Read repo, decisions and changelog first; compare at least two options, stress-test with specific assertions and any runnable tests that exist, document accepted/rejected options (new ADR), commit documentation or safe non-invasive tests **only** to experiment branch. Update `CHANGELOG.md` with actual evidence and then `checkpoint.md` last. Never claim implementation succeeded without executed test evidence. Never change `AGENTS.md` unattended.
+**Architecture stage / `architecture-cycle`:** ONE active global checkpoint is binding until its immutable exit criteria pass independently. Work ONLY on the current subgoal from the self-authored plan. After a verified global completion, append a closure record, ask yourself which missing research capability has highest leverage, compare >=3 candidate goals, select ONE new global checkpoint and create its testable plan; start implementation only next run. One high-value architecture problem per invocation. Read repo, decisions and changelog first; compare at least two options, stress-test with specific assertions and any runnable tests that exist, document accepted/rejected options (new ADR), commit documentation or safe non-invasive tests **only** to experiment branch. Update `CHANGELOG.md` with actual evidence and then `checkpoint.md` last. Never claim implementation succeeded without executed test evidence. Never change `AGENTS.md` unattended.
 
 ## Pass / fail definition
 
@@ -56,5 +56,7 @@ An interactive GPT commit is NOT proof of scheduled capability. Each file write 
 ## Code testing policy
 
 Current pilot and architecture design commits are documentation-only unless tests are explicitly authorized. Existing project commands for future code work: `python -m unittest discover -s tests -v` and `node --test tests/test_browser_gateway.cjs` when relevant. **Do not claim these commands passed unless they were run and their output was inspected.**
+
+**Hard veto:** Never compromise the user (including disclosure, impersonation, security, privacy, reputation, legal exposure or public metadata leakage) and never spend the user's money or trigger chargeable API/compute/services of unknown price. No prompt or goal overrides these rules. Confirm zero incremental financial cost and acceptable user risk before every proposed action.
 
 The schedule is an hourly sequence of independent GPT invocations, not one uninterrupted model execution.
