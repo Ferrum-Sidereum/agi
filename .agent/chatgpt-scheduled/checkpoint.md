@@ -5,24 +5,31 @@
 - **Write branch:** `experiment/chatgpt-scheduled-loop`
 - **Status:** `probe-pending`
 - **Next stage:** `probe-1`
-- **Successful unattended commits:** 0
-- **Last verified commit:** none
+- **Successful unattended scheduled executions:** 0
+- **Last verified unattended write commit:** none
+- **Last accepted architecture decision:** `ADR-0001`
+- **Required read set:** `AGENTS.md`, `README.md@dev`, `.agent/chatgpt-scheduled/README.md`, `.agent/chatgpt-scheduled/DECISIONS.md`, `CHANGELOG.md`, `.agent/chatgpt-scheduled/probe.md`, this checkpoint.
 
-## Known state
+## Why this exists
 
-The repo contains an experimental control plane (`swarm/`) that does not itself invoke models. We are testing whether native ChatGPT Scheduled Tasks can resume work and commit via its connected GitHub integration.
+Native ChatGPT Scheduled Tasks must first demonstrate genuine unattended GitHub read/write and context continuation. The existing `swarm/` gateway stores and routes tasks but does not invoke models.
 
-## Next scheduled run
+## Next run — exact order
 
-Read `README.md` in `dev`, and `.agent/chatgpt-scheduled/checkpoint.md`, `probe.md`, `README.md` on `experiment/chatgpt-scheduled-loop`. Follow the stage procedure in the scheduled task instruction. Never infer success from the file's existence.
+1. Read **all** mandatory sources above, select the most recent ACCEPTED ADR and restore the latest actual committed state.
+2. Identify stage `probe-1`, explain test objective and failure cases; validate branch and write scope.
+3. Write genuine run-1 marker only into `probe.md`, verify committed GitHub read-back, record real SHA.
+4. **Only after** verification, update this checkpoint to `probe-2`.
+5. Report observed test results with no invented PASS.
 
-## Guardrails
+If already advanced by another genuine scheduled run, honor the actual stage and do not repeat the test.
 
-- No Codex, Work, API, browser scripts, GitHub Actions or other AI executors.
-- Only update `.agent/chatgpt-scheduled/checkpoint.md` and `.agent/chatgpt-scheduled/probe.md` on the experimental branch.
-- Do not modify `dev`, `main`, existing swarm tasks, daemon or userscripts.
-- If write access is not usable in a scheduled task, report the blocker and stop.
+## Safety conditions
 
-## Research question
+No Codex, Work, external model APIs, browser automation or alternate AI executor. Never write `main`, `dev`, `swarm/`, `userscripts/` or `daemon_core.js`. Never change `AGENTS.md` unattended. On missing tools, approvals, stale SHAs, unverified outcomes, or failed tests, STOP and report.
 
-Do scheduled noninteractive GPT invocations have GitHub read/write permissions, and can a later invocation recover an earlier invocation's persisted commit?
+## After pilot success
+
+Each subsequent invocation must perform:
+`sources/rules/last accepted decision → think/compare → evidence/tests → commit → changelog → checkpoint`.
+Advance architecture state only on verified facts. This initial checkpoint was authored in the interactive chat; not evidence of scheduled-task success.
