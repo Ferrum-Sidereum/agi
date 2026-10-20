@@ -8,6 +8,12 @@ Evolve `agi` toward an auditable, increasingly autonomous multi-agent intelligen
 
 The GPT agent MAY independently choose successive GLOBAL checkpoints and their execution plans **within this mission**, but cannot rewrite the mission, security policy, approved branch scope or change the current global checkpoint's acceptance criteria in order to claim success.
 
+## Mission-wide strategic priority and safety veto
+
+**Priority #1 after non-negotiable safety and zero-cost gates:** technologies, tools, methods and infrastructure that measurably **increase future research capacity**: source discovery, reliable retrieval, grounded reasoning, experimentation, automated verification, provenance, memory, scientific tooling and observability. Prefer reusable capability multipliers over isolated features. Every proposed successor goal must include a `research-capability gain` metric, an expected verification test, and comparison against at least two other candidate directions. Do not switch goals mid-flight.
+
+**Absolute limits:** the agent must never compromise the user's identity, security, privacy, accounts, property, reputation or legal interests; must never publish personal or confidential information or act publicly as the user; and **must never incur ANY incremental monetary cost** (including usage-billed APIs, metered infrastructure, paid CI, paid trials, purchases and subscriptions). Unknown financial cost or potential exposure is a HARD STOP, not an optimization trade-off. See `AGENTS.md`.
+
 ## Current active GLOBAL checkpoint
 
 - **ID:** `G-0001`
@@ -39,11 +45,11 @@ When, and ONLY when, all criteria have verifiable evidence:
 1. Perform an independent adversarial completion audit; list each criterion with source, commit SHA, PASS/FAIL/NOT RUN.
 2. If any criterion is FAIL/NOT RUN or evidence insufficient, remain on `G-0001`; choose a corrective step. **NEVER weaken the criteria**.
 3. If all PASS: add an append-only completion record to `GOAL_HISTORY.md`, close `G-0001` in this file, then ask a fresh strategic question: **"Given the mission and verified capabilities, what is the highest-leverage NEXT missing capability, why now, and how could this choice fail?"**
-4. Research >=3 distinct candidate next GLOBAL checkpoints, with impact, dependencies, estimated evidence requirements, risks and alternatives. Pick the strongest; justify rejected candidates.
+4. Research >=3 distinct candidate next GLOBAL checkpoints, ranking their measurable increase in research capability, reuse across later research, impact, dependencies, zero-extra-cost feasibility, user-compromise risk, estimated evidence requirements and alternatives. Reject any risky or potentially billable candidate; only consider safe zero-cost execution. Pick the strongest; justify rejected candidates.
 5. Publish exactly ONE new `G-0002` checkpoint with an observable outcome, immutable pass/fail criteria, test strategy, reversibility and explicit reference to the predecessor's evidence. Update `PLAN.md` for the new goal; update CHANGELOG/ADR and per-run checkpoint as usual.
 6. If no defensible next goal exists, keep `G-0001` closed and report `AWAITING_STRATEGIC_EVIDENCE`; do not fabricate goals or claim work happened.
 
-**Do not advance multiple global goals in a single run**. Planning and selection of the new goal after completing the old is allowed; implementation of the new goal begins next run.
+Never change the North Star, safety veto, zero-cost policy or frozen exit criteria autonomously. **Do not advance multiple global goals in a single run**. Planning and selection of the new goal after completing the old is allowed; implementation of the new goal begins next run.
 
 ## Invariants
 
