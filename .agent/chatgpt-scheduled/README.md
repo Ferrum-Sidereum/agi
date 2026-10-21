@@ -8,8 +8,8 @@ Target: `Ferrum-Sidereum/agi`. Read sources from `dev`; write ONLY `experiment/c
 
 1. `AGENTS.md` fully: safety, research priority, budget 0, write scope, no self-disable.
 2. `README.md@dev` and relevant code/docs: ACTUAL project baseline.
-3. `.agent/chatgpt-scheduled/GOALS.md`, `PLAN.md`, `GOAL_HISTORY.md`, `checkpoint.md`, this README.
-4. `.agent/chatgpt-scheduled/DECISIONS.md`: latest ACCEPTED decision; `CHANGELOG.md`: recent actual changes. Verify branch and GitHub blob SHAs.
+3. Read the following exact repository-root-relative paths on `experiment/chatgpt-scheduled-loop`: `.agent/chatgpt-scheduled/README.md` (this file), `.agent/chatgpt-scheduled/GOALS.md`, `.agent/chatgpt-scheduled/PLAN.md`, `.agent/chatgpt-scheduled/GOAL_HISTORY.md`, `.agent/chatgpt-scheduled/checkpoint.md`.
+4. Read `.agent/chatgpt-scheduled/DECISIONS.md` for the latest ACCEPTED decision and **`CHANGELOG.md` at the repository root** for actual changes. `.agent/chatgpt-scheduled/CHANGELOG.md` is an invalid path. Verify branch and GitHub blob SHAs.
 5. Old `probe.md`, `G-0001`, and `probe-2` are HISTORICAL only: never read them as mandatory execution instructions or restore them as active.
 
 ## ZERO_STATE — choose goal on the NEXT run
