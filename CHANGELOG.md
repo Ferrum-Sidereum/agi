@@ -1,5 +1,12 @@
 # CHANGELOG — AGI architecture and ChatGPT scheduled experiment
 
+## 2026-10-21 — Corrected and verified GitHub paths (interactive)
+
+- **Issue:** The scheduled task incorrectly looked for `.agent/chatgpt-scheduled/CHANGELOG.md` (GitHub 404); the real file is root-level `CHANGELOG.md`.
+- **Corrections:** Added explicit repository-root-relative path manifest to `AGENTS.md` (commit `69b6bf9318645d5d97b55d3b538ac85663878dfe`) and `.agent/chatgpt-scheduled/README.md` (commit `0e5aaf42a2a34ec9cabb7c7757b275ea16563080`). Corrected the scheduled task's prompt paths without modifying its hourly schedule or enabled state.
+- **Checks:** GitHub reads verified that `AGENTS.md`, root `CHANGELOG.md`, the six `.agent/chatgpt-scheduled/` documents, and `README.md@dev` exist. Both documentation writes were independently re-read with exact content equality. **Runtime tests: NOT RUN** (documentation-only fix).
+- **Goal state:** Remains `ZERO_STATE`, no selected global goal; prior `G-0001` remains withdrawn. No implementation work performed.
+
 ## 2026-10-21 — User-directed zero-state reset (interactive)
 
 - **Change:** Removed the old active pilot gate `probe-2` and the preset `G-0001` from the working charter, global goals, tactical plan and runbook. Cleared active goal and subgoals, prepared `DISCOVER_FIRST_GOAL` for next scheduled invocation. Retired the experimental probe file; old evidence remains in Git history.
