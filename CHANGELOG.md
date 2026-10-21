@@ -1,5 +1,13 @@
 # CHANGELOG — AGI architecture and ChatGPT scheduled experiment
 
+## 2026-10-21 — User-directed zero-state reset (interactive)
+
+- **Change:** Removed the old active pilot gate `probe-2` and the preset `G-0001` from the working charter, global goals, tactical plan and runbook. Cleared active goal and subgoals, prepared `DISCOVER_FIRST_GOAL` for next scheduled invocation. Retired the experimental probe file; old evidence remains in Git history.
+- **Decision:** `ADR-0003` (supersedes pilot-only ADR-0001). The first BIG global checkpoint, its measurable frozen exit criteria and tactical plan must be discovered and authored by the next independent scheduled agent run, not by this interactive reset.
+- **Unchanged priority:** safe, free-to-run tools and technologies that measurably expand research ability. Never expose/compromise the user; no incremental expenses; no authorized change to protected runtime code or branches.
+- **Evidence:** Interactive GitHub write/read-back of configuration files. **Runtime tests NOT RUN**; no claim that future Scheduled Task writes will succeed. This reset is a change of mandate, NOT completion of former G-0001.
+- **Next:** scheduled agent reads source baseline/rules/latest ADR, compares >=3 genuinely distinct directions and commits ONE selected goal plus its plan; subsequent hours pursue it until independently verified complete.
+
 Append-only chronological record (newest entry first). Document **actual committed changes** and what testing was observed. Prospective plans belong in the checkpoint, not in this log.
 
 ## 2026-10-20 — Interactive design update — self-directed global goals and no-compromise/no-spend limits
