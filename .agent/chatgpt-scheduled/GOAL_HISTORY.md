@@ -1,19 +1,18 @@
-# Global checkpoint history — append-only
+# GLOBAL GOAL HISTORY — verified completions only
 
-This log tracks **CLOSED/VERIFIED** global checkpoints, not individual commits or every small task. See `GOALS.md` for the active goal and `PLAN.md` for current subgoals.
+- **Completed global goals in the current self-directed cycle:** 0
+- **Active global goal:** NONE (see `GOALS.md`)
+- **Historical note:** the earlier user-imposed `G-0001` feasibility pilot was withdrawn before completion; it is NOT a completed goal or a required dependency. Its diagnostic commits remain in Git history; see `CHANGELOG.md`.
 
-**No global checkpoint has been completed yet.** `G-0001` is active and its scheduled-pilot execution remains unverified as of the initial interactive setup.
+## For each verified closure (append only)
 
-## Required closure record
+- Goal ID and original frozen criteria (path + commit SHA)
+- PASS/FAIL/NOT RUN for EVERY criterion with independent evidence
+- Actual executed tests, remote read-back and commits
+- Findings and disproven assumptions
+- Reusable gain in research capability
+- Remaining risks and limitations
+- New strategic question generated AFTER this goal was closed
+- Candidate successor goals compared and why one was selected
 
-### `G-XXXX` — COMPLETE — <UTC time>
-
-- **Goal and frozen acceptance criteria source:** `GOALS.md` at the recorded pre-close commit SHA.
-- **Evidence for every criterion:** exact path, assertion/observed test, commit SHA, PASS or FAIL.
-- **Adversarial completion audit:** what was checked independently and what could still invalidate the conclusion.
-- **What was learned:** surprises, disproved hypotheses, known limitations, remaining risks.
-- **Strategic self-question:** what next important question the agent asked itself after completion.
-- **Next candidates considered:** >=3 and their trade-offs (or evidence why no defensible successor exists).
-- **Selected next checkpoint:** its ID, rationale and link to successor definition; do not start its implementation until next scheduled run.
-
-Never backdate a closure, silently edit prior closures, or mark untested work completed.
+Never fabricate a global completion or retroactively rewrite actual evidence.
