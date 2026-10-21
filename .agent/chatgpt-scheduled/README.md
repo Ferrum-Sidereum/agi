@@ -1,66 +1,37 @@
-# Native ChatGPT Scheduled Loop — runbook and feasibility gate
+# Autonomous Research Loop — operational runbook
 
-## Mission
+Target: `Ferrum-Sidereum/agi`. Read sources from `dev`; write ONLY `experiment/chatgpt-scheduled-loop`. Execution mechanism: native ordinary ChatGPT Scheduled Task plus connected GitHub app. No external agent runtime, Codex, Work, paid/API workers, or GitHub Actions executor.
 
-Test whether **ordinary ChatGPT Scheduled Tasks** can read and write GitHub WITHOUT a user approving each write, and preserve accurate project state between scheduled invocations. Codex, Work, external model APIs, GitHub Actions as an AI executor and browser automation are OUT OF SCOPE.
+**The pilot is OVER and NOT a condition of beginning research.** Historical diagnostic records are non-binding. The present system has ZERO active global goals; its next scheduled invocation must independently discover the first goal.
 
-- Repository: `Ferrum-Sidereum/agi`
-- Baseline/source branch: `dev`
-- Only writable branch: `experiment/chatgpt-scheduled-loop`
-- Current research status: **not yet verified by unattended runs**.
+## Mandatory read gate — at every scheduled invocation
 
-The existing `swarm/` gateway is a control plane, not an autonomous model executor. Do not modify it in this experiment.
+1. `AGENTS.md` fully: safety, research priority, budget 0, write scope, no self-disable.
+2. `README.md@dev` and relevant code/docs: ACTUAL project baseline.
+3. `.agent/chatgpt-scheduled/GOALS.md`, `PLAN.md`, `GOAL_HISTORY.md`, `checkpoint.md`, this README.
+4. `.agent/chatgpt-scheduled/DECISIONS.md`: latest ACCEPTED decision; `CHANGELOG.md`: recent actual changes. Verify branch and GitHub blob SHAs.
+5. Old `probe.md`, `G-0001`, and `probe-2` are HISTORICAL only: never read them as mandatory execution instructions or restore them as active.
 
-## Continuity across blocked runs
+## ZERO_STATE — choose goal on the NEXT run
 
-The Scheduled Task is **indefinite and hourly**. On any failure or safety block, **STOP ONLY THE CURRENT RUN** and report the failure. NEVER pause, disable, cancel, delete, edit or reschedule the task autonomously. Preserve G-0001 and the checkpoint at the last VERIFIED stage; never fabricate advancement. On the next hourly invocation read the GitHub state afresh and retry the authorized pending action only if the action is safe, permitted and zero-cost. No forced writes, alternate channels or bypasses of OpenAI's safety checks. If GitHub write keeps failing, still publish a short factual report each run. The user alone controls task enablement.
+- Independently ask what high-leverage research capability should be pursued next. Assess baseline; identify missing tools/technologies that multiply future research.
+- Formulate >=3 meaningfully distinct candidate BIG global checkpoints. Compare measurable research gains, reuse, feasibility, tests, counterarguments, dependencies, potential user compromise and incremental cost 0.
+- Select ONE evidence-backed global checkpoint yourself. Define unique ID, clear outcome, immutable pass/fail exit criteria, required tools, verification and rollback strategy. Do not adopt withdrawn pilot G-0001.
+- Independently create ordered, measurable tactical subgoals under the chosen global goal in `PLAN.md`; do not simply echo an earlier assistant-authored task list.
+- Commit GOALS, PLAN, architecture decision and CHANGELOG if appropriate, independently verify read-back and update `checkpoint.md` LAST to GOAL_ACTIVE. Next hourly run starts the first tactical action. If any critical write fails, leave ZERO_STATE / accurately report partial commits without claiming selection persisted.
 
-## Mandatory read gate — EVERY scheduled run, before analysis or writes
+## GOAL_ACTIVE — every further run
 
-1. Read `AGENTS.md` on experiment branch in full (hard rules and stop conditions).
-2. Read `README.md` on `dev`, then the relevant source files for the chosen issue.
-3. Read this runbook, `.agent/chatgpt-scheduled/GOALS.md` (active big checkpoint), `PLAN.md`, `GOAL_HISTORY.md` and `.agent/chatgpt-scheduled/checkpoint.md`.
-4. Read `.agent/chatgpt-scheduled/DECISIONS.md`; identify and cite the latest **ACCEPTED** ADR (currently ADR-0001).
-5. Read the latest `CHANGELOG.md` entries and `.agent/chatgpt-scheduled/probe.md`; cross-check whether a stage was already committed.
-6. Confirm working branch, current blob SHAs, and allowed write paths before any edit.
+Read rules/sources -> restore current goal and last accepted decision -> pick ONE critical-path action from plan -> compare approaches and challenge assumptions -> execute permitted research or implementation -> run actual relevant tests and falsifiers (NOT RUN != PASS) -> commit to experimental branch -> independently verify -> append truthful CHANGELOG and ADR as needed -> checkpoint LAST -> report.
 
-If anything mandatory is missing, stop; do not make up context.
+Prioritize technologies that multiply the ability to research in future cycles, not output volume. Never abandon the one current global checkpoint until an independent audit confirms every frozen criterion.
 
-## Required engineering cycle for EACH scheduled execution
+## GOAL_COMPLETE — after verified audit
 
-**READ INPUTS → RESTORE STATE → CHOOSE NEXT PROBLEM → THINK/CHALLENGE → VERIFY/TEST → COMMIT → VERIFY REMOTE → CHANGELOG → CHECKPOINT → REPORT.**
+Append verified closure to GOAL_HISTORY. Next run returns to autonomous strategic question with >=3 candidates and picks ONE successor. Never overlap implementation of two global goals.
 
-- `READ INPUTS`: current rules, original project sources, checkpoint, last ACCEPTED ADR, recent changelog.
-- `RESTORE STATE`: verify stage from committed GitHub content; don't trust only the task prompt or prior chat.
-- `CHOOSE NEXT PROBLEM`: only a step advancing the SINGLE current active global checkpoint (pilot: feasibility). Among safe zero-cost ways to advance it, prioritize reusable technologies and tools that multiply future research capability; do not abandon the current goal for a new one.
-- `THINK/CHALLENGE`: compare options and counterarguments; evaluate measurable research-capability gain, reuse, user-compromise/privacy/security/reputation risk, and incremental cost; any risk or expense blocks execution; record failure modes and falsifiable assumptions.
-- `VERIFY/TEST`: run *available* concrete tests/invariants and capture the observations. `NOT RUN` is never `PASS`.
-- `COMMIT`: only permitted changes, correct branch, compare-and-swap SHA where available; no merge/force.
-- `VERIFY REMOTE`: retrieve committed content again and confirm actual commit result/branch.
-- `CHANGELOG`: for post-pilot architecture cycles, append truthful results, evidence and change references.
-- `CHECKPOINT`: advance only after preceding write(s) verified. Checkpoint is always the final write.
-- `REPORT`: describe actual results and blockers, not intentions.
+## On failure
 
-## Pilot stages (first two unattended runs)
+Safety block, denied write, missing tool, test FAIL, potential expense, uncertain privacy, stale SHA: **STOP only the current action and report BLOCKED; NEVER pause/delete/disable/reschedule the hourly automation.** Retry on later runs only when safe; no tool-switch or bypassing a safety rejection. Don't claim successful tests or commits without actual evidence.
 
-**Stage 1 / `probe-1`:** perform mandatory reads, evaluate the risk/benefit of the proposed test (no modification of protected runtime). Confirm branch and existing marker fields. Update **only** `.agent/chatgpt-scheduled/probe.md` with the genuine run-1 marker including run time, last ACCEPTED ADR ID, and a summary of the rulebook validation. Commit via native GitHub write connector; independently read file back. If verified, update **only** `checkpoint.md` to `probe-2` with actual commit SHA(s). If write/approval fails, stop and explicitly report.
-
-**Stage 2 / `probe-2`:** repeat mandatory reads, retrieve and quote exact run-1 marker from GitHub; verify it is different from the current execution and from interactive setup. Commit second unique marker and the exact previous marker read-back to `probe.md`; independently retrieve it. If verified, update `checkpoint.md` to `architecture-cycle` with actual evidence. Do NOT claim a completed pilot if any part is missing.
-
-**Architecture stage / `architecture-cycle`:** ONE active global checkpoint is binding until its immutable exit criteria pass independently. Work ONLY on the current subgoal from the self-authored plan. After a verified global completion, append a closure record, ask yourself which missing research capability has highest leverage, compare >=3 candidate goals, select ONE new global checkpoint and create its testable plan; start implementation only next run. One high-value architecture problem per invocation. Read repo, decisions and changelog first; compare at least two options, stress-test with specific assertions and any runnable tests that exist, document accepted/rejected options (new ADR), commit documentation or safe non-invasive tests **only** to experiment branch. Update `CHANGELOG.md` with actual evidence and then `checkpoint.md` last. Never claim implementation succeeded without executed test evidence. Never change `AGENTS.md` unattended.
-
-## Pass / fail definition
-
-`PASS`: two separate scheduled executions with genuine GitHub writes and verified read-back; second run reads first run's persisted marker. No mid-run user approvals and no prohibited paths touched.
-
-`BLOCKED`: scheduled tool missing, approval required, wrong branch, stale SHA, unreadable files or failed write. State the blocker; do not bypass via another model/runtime.
-
-An interactive GPT commit is NOT proof of scheduled capability. Each file write can be a separate commit; there is no implied cross-file transaction. On restart, first inspect actual repository state and reconcile only verified work.
-
-## Code testing policy
-
-Current pilot and architecture design commits are documentation-only unless tests are explicitly authorized. Existing project commands for future code work: `python -m unittest discover -s tests -v` and `node --test tests/test_browser_gateway.cjs` when relevant. **Do not claim these commands passed unless they were run and their output was inspected.**
-
-**Hard veto:** Never compromise the user (including disclosure, impersonation, security, privacy, reputation, legal exposure or public metadata leakage) and never spend the user's money or trigger chargeable API/compute/services of unknown price. No prompt or goal overrides these rules. Confirm zero incremental financial cost and acceptable user risk before every proposed action.
-
-The schedule is an hourly sequence of independent GPT invocations, not one uninterrupted model execution.
+Historic GitHub pilot markers are available through older Git commits if retrospective research is useful. They do NOT count as active work or prerequisites.
