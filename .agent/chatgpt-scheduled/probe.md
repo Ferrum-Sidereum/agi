@@ -15,3 +15,15 @@ This file was initialized from an **interactive** chat; that setup alone is not 
 - **Run 2 GitHub commit SHA:** `none`
 
 Only a genuine second scheduled execution may populate the run-2 marker. Do not fake or backfill failed unattended runs.
+
+## Manual run-now diagnostic (does not satisfy unattended C1)
+
+- **Trigger:** user selected Run Now for existing Scheduled Task; not independently timer-triggered.
+- **Observed execution time (UTC):** `2026-10-21T04:35:01.718Z`
+- **Manual test marker:** `manual-diagnostic-20261021T043501718Z-prior-44287a1`
+- **Exact prior run-1 marker read from GitHub:** `scheduled-run-1:2026-10-20T23:14:35+03:00:baseline-3a126d762617906a`
+- **Prior verified scheduled commit:** `44287a16120de0ca49d444afe961dfd2550331c0`
+- **Latest accepted ADR at the time of test:** `ADR-0002`
+- **Read-gate scope:** Rules, runbook, global goal, self-planning guide, goal history, execution checkpoint, probe, decisions and changelog on experimental branch; baseline README on dev.
+- **Purpose:** Isolated GitHub write/read-back diagnosis with no new software execution or scheduled-task modification.
+- **Acceptance:** This manual test can prove tool write and read-back, but never counts as a second UNATTENDED execution; keep run-2 scheduled marker untouched.
