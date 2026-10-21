@@ -23,6 +23,18 @@ Append-only evidence-oriented architecture decisions. The newest date is not nec
 - **Risk / failure mode:** Self-reported completion, goal drift, quota-to-billing ambiguity, privacy leakage via logs/public commits. Mitigation: frozen exit criteria; read-only provenance checks; explicit cost=0 and user-risk veto before every action; append-only milestone history.
 - **Reversal condition:** Only an explicit interactive instruction from the user can amend the mission, hard spending/security limits or frozen exit criteria. The agent cannot grant itself an exception.
 
+## ADR-0003 — ACCEPTED — User-directed zero-state reset and independent goal discovery
+
+- **Date:** 2026-10-21
+- **Authority:** Explicit user instruction to remove the pilot and reset the research agent to zero state, allowing the next scheduled run to independently choose its own first BIG global checkpoint from the user's priorities.
+- **Decision:** Retire the old `probe-1` / `probe-2` acceptance gate and **WITHDRAW, NOT COMPLETE**, the assistant-imposed global goal `G-0001`. New `GOALS.md` and `PLAN.md` begin with NO active goal or tactical tasks. The next hourly scheduled invocation MUST inspect real sources and the charter, formulate >=3 research-capability multiplier directions, challenge alternatives, and independently select ONE verifiable global goal and its own plan. Implementation begins on the following run. Research capability gains take priority, with absolute zero-cost and user-protection vetoes. Persist results via actual verified GitHub commits and checkpoint LAST; never self-disable the hourly task on error.
+- **Supersedes:** `ADR-0001` (mandatory two-run GitHub feasibility pilot) and any fixed G-0001/probe-stage obligations in old runbooks. `ADR-0002` continues to govern single-active-goal discipline, measurable research leverage, security, privacy and budget 0.
+- **Prior evidence:** The earlier unattended marker and manual diagnostic are real historical commits, not proof that the abandoned pilot was completed or evidence for a new self-selected goal. They remain in Git history and are not to be reactivated.
+- **Alternatives rejected:** Extend blocked pilot indefinitely; have an interactive assistant choose the next goal now; silently declare pilot passed. All conflict with user's stated preference for zero state and autonomous strategic choice.
+- **Validation:** Inspect current `GOALS.md` (`ZERO_STATE`, active NONE), `PLAN.md` (no active subgoal), `checkpoint.md` (`DISCOVER_FIRST_GOAL`), and scheduled instruction (no references to probe gates); verify relevant GitHub read-backs. Execution of a future goal remains unverified.
+- **Risk:** Failure of next Scheduled Task's GitHub write must leave zero state intact and hourly recurrence enabled; no alternative payment/API or unauthorized runtime.
+- **Reversal:** Only explicit future user instruction may restore or revise these priorities and safety limits.
+
 ## Recording a future decision
 
 Use `ADR-0002`, `ADR-0003`, ... with exactly one status (`PROPOSED`, `ACCEPTED`, `REJECTED`, `SUPERSEDED`), context, alternatives, evidence, failure modes, test references, implications and reversal criteria.
