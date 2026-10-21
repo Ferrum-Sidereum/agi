@@ -20,7 +20,7 @@ Evaluate prospective directions by measurable expected research-capability gain,
 
 1. Fetch THIS rulebook fully from experimental branch.
 2. Fetch current `README.md` from `dev` and relevant current source files.
-3. Fetch `.agent/chatgpt-scheduled/README.md` (operating method), `GOALS.md` (global checkpoint registry), `PLAN.md` (self-authored subgoals), `checkpoint.md` (latest execution state), `GOAL_HISTORY.md`, `DECISIONS.md` (newest ACCEPTED ADR) and `CHANGELOG.md`. Recover actual GitHub commits and latest blob SHAs.
+3. Fetch the following **exact repository-root-relative paths** on `experiment/chatgpt-scheduled-loop` (never infer a parent directory): `AGENTS.md`, `.agent/chatgpt-scheduled/README.md`, `.agent/chatgpt-scheduled/GOALS.md`, `.agent/chatgpt-scheduled/PLAN.md`, `.agent/chatgpt-scheduled/GOAL_HISTORY.md`, `.agent/chatgpt-scheduled/DECISIONS.md`, `.agent/chatgpt-scheduled/checkpoint.md`, and **`CHANGELOG.md` at the repository root**. Never try `.agent/chatgpt-scheduled/CHANGELOG.md` (that path does not exist). Recover actual GitHub commits and latest blob SHAs.
 4. Treat older experiment records as HISTORY, not unfinished tasks. If active-goal field is NONE, do NOT recover historical G-0001 or `probe-2` as a pending requirement.
 5. On missing required files, conflicting remote state, or approval-required writes: STOP CURRENT RUN, publish factual BLOCKED report, leave scheduler enabled.
 
