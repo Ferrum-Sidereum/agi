@@ -11,6 +11,10 @@ Test whether **ordinary ChatGPT Scheduled Tasks** can read and write GitHub WITH
 
 The existing `swarm/` gateway is a control plane, not an autonomous model executor. Do not modify it in this experiment.
 
+## Continuity across blocked runs
+
+The Scheduled Task is **indefinite and hourly**. On any failure or safety block, **STOP ONLY THE CURRENT RUN** and report the failure. NEVER pause, disable, cancel, delete, edit or reschedule the task autonomously. Preserve G-0001 and the checkpoint at the last VERIFIED stage; never fabricate advancement. On the next hourly invocation read the GitHub state afresh and retry the authorized pending action only if the action is safe, permitted and zero-cost. No forced writes, alternate channels or bypasses of OpenAI's safety checks. If GitHub write keeps failing, still publish a short factual report each run. The user alone controls task enablement.
+
 ## Mandatory read gate — EVERY scheduled run, before analysis or writes
 
 1. Read `AGENTS.md` on experiment branch in full (hard rules and stop conditions).
